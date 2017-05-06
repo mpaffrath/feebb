@@ -5,6 +5,9 @@ class Preprocessor:
     def __init__(self):
         self.reset()
 
+    def __str__(self):
+        return json.dumps(self.__dict__, indent=2, separators=(',', ': '))
+
     def reset(self):
         self.number_elements = 0
         self.length_elements = []
