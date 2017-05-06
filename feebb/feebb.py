@@ -4,13 +4,21 @@ import numpy as np
 
 
 class Element:
-    def __init__(self):
-        self.length = 0
-        self.E = 0
-        self.I = 0
-        self.loads = []
+    def __init__(self, preprocessed=None):
         self.stiffness = np.array([])
         self.nodal_loads = np.zeros((4))
+        if preprocessed is None:
+            self.length = 0
+            self.E = 0
+            self.I = 0
+            self.loads = []
+        else:
+            self.length = preprocessed.length
+            self.E = preprocessed.E
+            self.I = preprocessed.I
+            self.loads = preprocessed.loads
+            self.local_stiffness()
+            self.load_vector()
 
     def local_stiffness(self):
         kfv = 12 * self.E * self.I / self.length ** 3
