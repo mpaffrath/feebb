@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class Element:
     def __init__(self):
         self.length = 0
@@ -23,10 +24,11 @@ class Element:
 
     def fer_point(self, p, a):
         b = self.length - a
-        v = [(p * b ** 2 * (3*a + b)) / l** 3, (p * a ** 2 * (a + 3 * b)) / l ** 3]
-        m = [p * a * b ** 2 /  l ** 2, p * a ** 2 * b / l** 2]
+        v = [(p * b ** 2 * (3*a + b)) / self.length ** 3, (p * a ** 2 * (a + 3 * b))
+             / self.length ** 3]
+        m = [p * a * b ** 2 / self.length ** 2, p * a ** 2 * b / self.length ** 2]
         load_vector = np.array([v[0], -m[0], v[1], m[1]])
-        return  load_vector
+        return load_vector
 
     def fer_distrib(self, w):
         v = w * self.length / 2
@@ -54,16 +56,16 @@ class Element:
         for load in self.loads:
             if load['type'] == 'udl':
                 self.nodal_loads = (self.nodal_loads
-                                    + fer_distrib(self.length, load['magnitude']))
+                                    + self.fer_distrib(self.length, load['magnitude']))
             elif load['type'] == 'point':
                 self.nodal_loads = (self.nodal_loads
-                                    + fer_point(self.length, load['magnitude'],
-                                               load['location']))
+                                    + self.fer_point(self.length, load['magnitude'],
+                                                     load['location']))
             elif load['type'] == 'patch':
                 self.nodal_loads = (self.nodal_loads
-                                    + fer_patch(self.length, load['magnitude'],
-                                               load['start'], load['end']))
+                                    + self.fer_patch(self.length, load['magnitude'],
+                                                     load['start'], load['end']))
             elif load['type'] == 'moment':
                 self.nodal_loads = (self.nodal_loads
-                                    + fer_moment(self.length, load['magnitude'],
-                                                load['location']))
+                                    + self.fer_moment(self.length, load['magnitude'],
+                                                      load['location']))
