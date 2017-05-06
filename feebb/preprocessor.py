@@ -1,5 +1,6 @@
 import json
 
+
 class Preprocessor:
     def __init__(self):
         self.reset()
@@ -27,4 +28,3 @@ class Preprocessor:
         #         self.loads.append(load)
         self.loads = [element['loads'] for element in model['elements']]
         self.supports = model['supports']
-    load['location']))

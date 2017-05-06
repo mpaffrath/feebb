@@ -9,6 +9,7 @@ class Element:
         self.E = 0
         self.I = 0
         self.loads = []
+        self.stiffness = np.array([])
         self.nodal_loads = np.zeros((4))
 
     def local_stiffness(self):
@@ -69,3 +70,31 @@ class Element:
                 self.nodal_loads = (self.nodal_loads
                                     + self.fer_moment(self.length, load['magnitude'],
                                                       load['location']))
+
+
+class Beam():
+    def __init__(self, elements, supports):
+        self.num_elements = len(elements)
+        self.num_nodes = self.num_elements + 1
+        self.num_dof = self.num_nodes * 2
+        self.supports = supports
+        self.stiffness = np.zeros((self.num_dof, self.num_dof))
+        self.load = np.zeros((self.num_dof))
+        for i, element in enumerate(elements):
+            a = i * 2
+            b = a + 4
+            stiffness_element = np.zeros_like(self.stiffness)
+            stiffness_element[a:b, a:b] = element.stiffness
+            self.stiffness = self.stiffness + stiffness_element
+            load_element = np.zeros_like(self.load)
+            load_element[a:b] = element.nodal_loads
+            self.load = self.load - load_element
+
+        for i in range(self.num_dof):
+            if self.supports[i] < 0:
+                self.stiffness[i, :] = 0
+                self.stiffness[:, i] = 0
+                self.stiffness[i, i] = 1
+                self.load[i] = 0
+
+        self.displacement = np.linalg.solve(self.stiffness, self.load)
