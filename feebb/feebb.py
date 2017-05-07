@@ -24,7 +24,7 @@ class Preprocessor:
    """
 
     def __init__(self):
-        """The Preprocessor class is intialied with all attributes as `None`."""
+        """The Preprocessor class is initialized with all attributes as `None`."""
 
         self.reset()
 
