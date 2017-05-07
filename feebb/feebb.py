@@ -1,6 +1,60 @@
 # -*- coding: utf-8 -*-
+"""
+feebb - Finite Element Euler-Bernoulli Beams
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Feebb is a library for analysing beams using Euler-Bernoulli beam theory. It includes
+a preprocessor to aid in building the model as well as a postprocessor for obtaining
+forces and displacemnts at no-nodal locations.
+"""
+import json
 import numpy as np
+
+
+class Preprocessor:
+    """Class for reading in preformatted input data for building the FEA model.
+
+    Attributes:
+        number_elements (int): Total number of elemnts in the model.
+        elements (:obj:`list` of :obj:`dict`): A list of dictionaries. Each dictionary
+            contains the defnition of a single beam element.
+        supports (:obj:`list' of :obj:`int`): A list of the degrees of freedom at each
+            node.
+
+   """
+
+    def __init__(self):
+        """The Preprocessor class is intialied with all attributes as `None`."""
+
+        self.reset()
+
+    def __str__(self):
+        return json.dumps(self.__dict__, indent=2, separators=(',', ': '))
+
+    def reset(self):
+        """Sets all attributes to `None`."""
+
+        self.number_elements = None
+        # self.loads = []
+        self.elements = None
+        self.supports = None
+
+    def load_json(self, infile):
+        """Reads on formatted input data from a .json file
+
+        Args:
+            infile (str): Name of the .json file to parse.
+
+        """
+
+        self.reset()
+        with open(infile) as json_model:
+            model = json.load(json_model)
+
+        self.number_elements = len(model['elements'])
+        # self.loads = [element['loads'] for element in model['elements']]
+        self.elements = model['elements']
+        self.supports = model['supports']
 
 
 class Element:
