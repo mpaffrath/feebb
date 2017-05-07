@@ -13,10 +13,10 @@ class Element:
             self.I = 0
             self.loads = []
         else:
-            self.length = preprocessed.length
-            self.E = preprocessed.E
-            self.I = preprocessed.I
-            self.loads = preprocessed.loads
+            self.length = preprocessed['length']
+            self.E = preprocessed['youngs_mod']
+            self.I = preprocessed['moment_of_inertia']
+            self.loads = preprocessed['loads']
             self.local_stiffness()
             self.load_vector()
 
@@ -65,18 +65,18 @@ class Element:
         for load in self.loads:
             if load['type'] == 'udl':
                 self.nodal_loads = (self.nodal_loads
-                                    + self.fer_distrib(self.length, load['magnitude']))
+                                    + self.fer_distrib(load['magnitude']))
             elif load['type'] == 'point':
                 self.nodal_loads = (self.nodal_loads
-                                    + self.fer_point(self.length, load['magnitude'],
+                                    + self.fer_point(load['magnitude'],
                                                      load['location']))
             elif load['type'] == 'patch':
                 self.nodal_loads = (self.nodal_loads
-                                    + self.fer_patch(self.length, load['magnitude'],
+                                    + self.fer_patch(load['magnitude'],
                                                      load['start'], load['end']))
             elif load['type'] == 'moment':
                 self.nodal_loads = (self.nodal_loads
-                                    + self.fer_moment(self.length, load['magnitude'],
+                                    + self.fer_moment(load['magnitude'],
                                                       load['location']))
 
 
