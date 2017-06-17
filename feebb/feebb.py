@@ -58,6 +58,8 @@ class Preprocessor:
 
 
 class Element:
+    """Class for a single finite element."""
+
     def __init__(self, preprocessed=None):
         self.stiffness = np.array([])
         self.nodal_loads = np.zeros((4))
@@ -75,6 +77,8 @@ class Element:
             self.load_vector()
 
     def local_stiffness(self):
+        """Local stiffness matrix for element."""
+
         kfv = 12 * self.E * self.I / self.length ** 3
         kmv = 6 * self.E * self.I / self.length ** 2
         kft = kmv
@@ -86,6 +90,8 @@ class Element:
                                    [-kft, kmth, kft, kmt]])
 
     def fer_point(self, p, a):
+        """Fixed-end reactons due to point load."""
+
         b = self.length - a
         v = [(p * b ** 2 * (3*a + b)) / self.length ** 3, (p * a ** 2 * (a + 3 * b))
              / self.length ** 3]
@@ -94,12 +100,16 @@ class Element:
         return load_vector
 
     def fer_distrib(self, w):
+        """Fixed-end reactions due to uniformly distributed load."""
+
         v = w * self.length / 2
         m = w * self.length ** 2 / 12
         load_vector = np.array([v, -m, v, m])
         return load_vector
 
     def fer_patch(self, w, start, end):
+        """Fixed-end reactions due to uniform "patch" load."""
+
         d = end - start
         a = start + d / 2
         b = self.length - a
@@ -113,9 +123,13 @@ class Element:
         return load_vector
 
     def fer_moment():
+        """Fixed-end reactions due to concentrated moment."""
+
         pass
 
     def load_vector(self):
+        """Resultant nodal load vector due to all loads on element."""
+
         for load in self.loads:
             if load['type'] == 'udl':
                 self.nodal_loads = (self.nodal_loads
@@ -135,6 +149,8 @@ class Element:
 
 
 class Beam():
+    """Class for an assembly of elements into a single beam."""
+
     def __init__(self, elements, supports):
         self.num_elements = len(elements)
         self.num_nodes = self.num_elements + 1
