@@ -122,7 +122,7 @@ class Element:
         load_vector = np.array([v[0], -m[0], v[1], m[1]])
         return load_vector
 
-    def fer_moment():
+    def fer_moment(self):
         """Fixed-end reactions due to concentrated moment."""
 
         pass
@@ -176,3 +176,35 @@ class Beam():
                 self.load[i] = 0
 
         self.displacement = np.linalg.solve(self.stiffness, self.load)
+
+class InterpFunc():
+    """Class of Hermite cubic interpolation functions and their derivatives."""
+
+    def __init__(self, length, num_points):
+        self.length = length
+        self.x_bar = np.linspace(0, length, num_points)
+        self.a = x / length
+
+    def displacment(self):
+        phi_1 = 1 - 3 * self.a ** 2 + 2 * self.a ** 3
+        phi_2 = -self.x * (1 - self.a) ** 2
+        phi_3 = 3 *  self.a ** 2 - 2 * self.a ** 3
+        phi_4 = -self.x * (self.a ** 2 - self.a)
+
+    def slope(self):
+        d_phi_1 = -6 / self.length * self.a * (1 - self.a)
+        d_phi_2 = -(1 + 3 * self.a ** 2 - 4 * self.a)
+        d_phi_3 = -d_phi_1
+        d_phi_4 = -self.a * (3 * self.a - 2)
+
+    def moment(self):
+        dd_phi_1 = -6 / self.length**2 * (1 - 2 * self.a)
+        dd_phi_2 = -2 / self.length**2 * (3 * self.a - 2)
+        dd_phi_3 = -dd_phi_1
+        dd_phi_4 = -2 / self.length * (3 * self.a - 1)
+
+    def shear(self):
+        ddd_phi_1 = 12 / self.length**3
+        ddd_phi_2 = -6 / self.length**2
+        ddd_phi_3 = -ddd_phi_1
+        ddd_phi_4 = ddd_phi_2
