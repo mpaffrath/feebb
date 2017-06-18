@@ -196,32 +196,54 @@ class Postprocessor():
 
     def __init__(self, beam, num_points):
         self.beam = beam
+        self.num_points
 
-    # def __init__(self, length, num_points):
-    #     self.length = length
-    #     self.x_bar = np.linspace(0, length, num_points)
-    #     self.a = x / length
+    def __phi_displacment(self, x, a):
+        phi_1 = 1 - 3 * a ** 2 + 2 * a ** 3
+        phi_2 = -x * (1 - a) ** 2
+        phi_3 = 3 *  a ** 2 - 2 * a ** 3
+        phi_4 = -x * (a ** 2 - a)
 
-    def displacment(self):
-        phi_1 = 1 - 3 * self.a ** 2 + 2 * self.a ** 3
-        phi_2 = -self.x * (1 - self.a) ** 2
-        phi_3 = 3 *  self.a ** 2 - 2 * self.a ** 3
-        phi_4 = -self.x * (self.a ** 2 - self.a)
+        return np.array([phi_1, phi_2, phi_3, phi_4])
 
-    def slope(self):
-        d_phi_1 = -6 / self.length * self.a * (1 - self.a)
-        d_phi_2 = -(1 + 3 * self.a ** 2 - 4 * self.a)
-        d_phi_3 = -d_phi_1
-        d_phi_4 = -self.a * (3 * self.a - 2)
+    def __phi_slope(self, length, a):
+        phi_1 = -6 / length * a * (1 - a)
+        phi_2 = -(1 + 3 * a ** 2 - 4 * a)
+        phi_3 = -phi_1
+        phi_4 = -a * (3 * a - 2)
 
-    def moment(self):
-        dd_phi_1 = -6 / self.length**2 * (1 - 2 * self.a)
-        dd_phi_2 = -2 / self.length**2 * (3 * self.a - 2)
-        dd_phi_3 = -dd_phi_1
-        dd_phi_4 = -2 / self.length * (3 * self.a - 1)
+        return np.array([phi_1, phi_2, phi_3, phi_4])
 
-    def shear(self):
-        ddd_phi_1 = 12 / self.length**3
-        ddd_phi_2 = -6 / self.length**2
-        ddd_phi_3 = -ddd_phi_1
-        ddd_phi_4 = ddd_phi_2
+    def __phi_moment(self, length, a):
+        phi_1 = -6 / length**2 * (1 - 2 * a)
+        phi_2 = -2 / length**2 * (3 * a - 2)
+        phi_3 = -phi_1
+        phi_4 = -2 / length * (3 * a - 1)
+
+        return np.array([phi_1, phi_2, phi_3, phi_4])
+
+    def __phi_shear(self, length, a):
+        phi_1 = 12 / length**3
+        phi_2 = -6 / length**2
+        phi_3 = -phi_1
+        phi_4 = phi_2
+
+        return np.array([phi_1, phi_2, phi_3, phi_4])
+
+    def interp(self, action):
+        # all functions dont have the same arguments FIX
+        interp_func = {'displacement': self.__phi_displacement,
+                       'slope': self.__phi_slope,
+                       'moment': self.__phi_moment,
+                       'shear': self.__phi_shear}
+        points = []
+        for i in range(self.beam.num_elements):
+            i_node = i * 2
+            j_node = i_node + 4
+            disp_nodes = self.beam.displacement[i_node:j_node]
+            x_bar  = np.linspace(0, self.beam.len_elements[i], self.num_points)
+            a = x_bar / self.beam.len_elements[i]
+            phi = interp_func[action](self.beam.len_elements[i], a)
+            points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
+
+        return points
