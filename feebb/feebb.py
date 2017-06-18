@@ -58,6 +58,21 @@ class Preprocessor:
 
 
 class Element:
+    """Euler-Bernoulli beam element.
+
+    This class is used to define a single finite element using Euler-Bernoulli beam
+    theory. This is a 2-node element with 2 degrees of freedom per node.
+
+    Attributes:
+        stiffness (:obj:`numpy.array'): Local element stiffness matrix.
+        nodal_loads (:obj:`numpy.array`): Nodal load vector.
+        length (float): Length of element.
+        E (float): Modulus of elasticity or Young's modulus of element.
+        I (float): Moment of inertia of element.
+        loads (:obj:`l
+
+    """
+
     def __init__(self, preprocessed=None):
         self.stiffness = np.array([])
         self.nodal_loads = np.zeros((4))
