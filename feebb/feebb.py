@@ -165,6 +165,7 @@ class Beam():
     """Class for an assembly of elements into a single beam."""
 
     def __init__(self, elements, supports):
+        self.len_elements = [element.length for element in elements]
         self.num_elements = len(elements)
         self.num_nodes = self.num_elements + 1
         self.num_dof = self.num_nodes * 2
@@ -190,13 +191,16 @@ class Beam():
 
         self.displacement = np.linalg.solve(self.stiffness, self.load)
 
-class InterpFunc():
+class Postprocessor():
     """Class of Hermite cubic interpolation functions and their derivatives."""
 
-    def __init__(self, length, num_points):
-        self.length = length
-        self.x_bar = np.linspace(0, length, num_points)
-        self.a = x / length
+    def __init__(self, beam, num_points):
+        self.beam = beam
+
+    # def __init__(self, length, num_points):
+    #     self.length = length
+    #     self.x_bar = np.linspace(0, length, num_points)
+    #     self.a = x / length
 
     def displacment(self):
         phi_1 = 1 - 3 * self.a ** 2 + 2 * self.a ** 3
