@@ -234,10 +234,10 @@ class Postprocessor():
     def interp(self, action):
         # all functions dont have the same arguments FIX. probablly just use and if
         # in the for loop below
-        interp_func = {'displacement': self.__phi_displacement,
-                       'slope': self.__phi_slope,
-                       'moment': self.__phi_moment,
-                       'shear': self.__phi_shear}
+        # interp_func = {'displacement': self.__phi_displacement,
+        #                'slope': self.__phi_slope,
+        #                'moment': self.__phi_moment,
+        #                'shear': self.__phi_shear}
         points = []
         for i in range(self.beam.num_elements):
             i_node = i * 2
@@ -245,7 +245,15 @@ class Postprocessor():
             disp_nodes = self.beam.displacement[i_node:j_node]
             x_bar = np.linspace(0, self.beam.len_elements[i], self.num_points)
             a = x_bar / self.beam.len_elements[i]
-            phi = interp_func[action](self.beam.len_elements[i], a)
+            if action == 'displacement':
+                phi = self.__phi_displacment(self.beam.len_elements[i], x_bar, a)
+            if action == 'slope':
+                phi = self.__phi_slope(self.beam.len_elements[i], a)
+            if action == 'moment':
+                phi = self.__phi_moment(self.beam.len_elements[i], a)
+            if action == 'shear':
+                phi = self.__phi_shear(self.beam.len_elements[i], a)
+
             points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
 
         return points
