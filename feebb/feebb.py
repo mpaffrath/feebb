@@ -191,17 +191,18 @@ class Beam():
 
         self.displacement = np.linalg.solve(self.stiffness, self.load)
 
+
 class Postprocessor():
     """Class of Hermite cubic interpolation functions and their derivatives."""
 
     def __init__(self, beam, num_points):
         self.beam = beam
-        self.num_points
+        self.num_points = num_points
 
     def __phi_displacment(self, x, a):
         phi_1 = 1 - 3 * a ** 2 + 2 * a ** 3
         phi_2 = -x * (1 - a) ** 2
-        phi_3 = 3 *  a ** 2 - 2 * a ** 3
+        phi_3 = 3 * a ** 2 - 2 * a ** 3
         phi_4 = -x * (a ** 2 - a)
 
         return np.array([phi_1, phi_2, phi_3, phi_4])
@@ -241,7 +242,7 @@ class Postprocessor():
             i_node = i * 2
             j_node = i_node + 4
             disp_nodes = self.beam.displacement[i_node:j_node]
-            x_bar  = np.linspace(0, self.beam.len_elements[i], self.num_points)
+            x_bar = np.linspace(0, self.beam.len_elements[i], self.num_points)
             a = x_bar / self.beam.len_elements[i]
             phi = interp_func[action](self.beam.len_elements[i], a)
             points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
