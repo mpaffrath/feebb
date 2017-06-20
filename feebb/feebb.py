@@ -232,7 +232,8 @@ class Postprocessor():
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
     def interp(self, action):
-        # all functions dont have the same arguments FIX
+        # all functions dont have the same arguments FIX. probablly just use and if
+        # in the for loop below
         interp_func = {'displacement': self.__phi_displacement,
                        'slope': self.__phi_slope,
                        'moment': self.__phi_moment,
