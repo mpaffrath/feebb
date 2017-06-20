@@ -135,7 +135,7 @@ class Element:
         load_vector = np.array([v[0], -m[0], v[1], m[1]])
         return load_vector
 
-    def fer_moment(self):
+    def fer_moment(self, m, a):
         """Fixed-end reactions due to concentrated moment."""
 
         pass
