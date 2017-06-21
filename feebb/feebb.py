@@ -166,6 +166,8 @@ class Beam():
 
     def __init__(self, elements, supports):
         self.len_elements = [element.length for element in elements]
+        self.E_elements = [element.E for element in elements]
+        self.I_elements = [element.I for element in elements]
         self.num_elements = len(elements)
         self.num_nodes = self.num_elements + 1
         self.num_dof = self.num_nodes * 2
@@ -212,7 +214,7 @@ class Postprocessor():
     def __phi_slope(self, length, a):
         """First derivative of __phi_displacment."""
 
-        phi_1 = -6 / length * a * (1 - a)
+        phi_1 = -(6 / length) * a * (1 - a)
         phi_2 = -(1 + 3 * a ** 2 - 4 * a)
         phi_3 = -phi_1
         phi_4 = -a * (3 * a - 2)
@@ -241,27 +243,28 @@ class Postprocessor():
 
     def interp(self, action):
         """Application of the interpolation functions."""
-        # all functions dont have the same arguments FIX. probablly just use and if
-        # in the for loop below
-        # interp_func = {'displacement': self.__phi_displacement,
-        #                'slope': self.__phi_slope,
-        #                'moment': self.__phi_moment,
-        #                'shear': self.__phi_shear}
+
+
         points = []
         for i in range(self.beam.num_elements):
             i_node = i * 2
             j_node = i_node + 4
             disp_nodes = self.beam.displacement[i_node:j_node]
-            x_bar = np.linspace(0, self.beam.len_elements[i], self.num_points)
-            a = x_bar / self.beam.len_elements[i]
+            length = self.beam.len_elements[i]
+            E = self.beam.E_elements[i]
+            I = self.beam.I_elements[i]
+            x_bar = np.linspace(0, length, self.num_points)
+            a = x_bar / length
             if action == 'displacement':
-                phi = self.__phi_displacment(self.beam.len_elements[i], x_bar, a)
+                phi = self.__phi_displacment(x_bar, a)
+                points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
             if action == 'slope':
-                phi = self.__phi_slope(self.beam.len_elements[i], a)
+                phi = self.__phi_slope(length, a)
             if action == 'moment':
-                phi = self.__phi_moment(self.beam.len_elements[i], a)
+                phi = self.__phi_moment(length, a)
+                points.extend((E * I) * (np.sum(disp_nodes.reshape(4, 1) * phi, axis=0)))
             if action == 'shear':
-                phi = self.__phi_shear(self.beam.len_elements[i], a)
-            points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
+                phi = self.__phi_shear(length, a)
+            # points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
 
         return points
