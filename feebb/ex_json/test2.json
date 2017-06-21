@@ -1,0 +1,37 @@
+{
+  "elements":[
+    {
+      "element":1,
+      "length":10,
+      "youngs_mod":6000,
+      "moment_of_inertia":1,
+      "loads":[
+        {
+          "type":"udl",
+          "magnitude":10
+        }
+      ]
+    },
+    {
+      "element":2,
+      "length":10,
+      "youngs_mod":6000,
+      "moment_of_inertia":1,
+      "loads":[
+        {
+          "type":"udl",
+          "magnitude":10
+        }
+      ]
+    }
+
+  ],
+  "supports":[
+    -1,
+    0,
+    0,
+    0,
+    -1,
+    0
+  ]
+}
