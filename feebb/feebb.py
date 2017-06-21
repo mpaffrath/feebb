@@ -200,6 +200,8 @@ class Postprocessor():
         self.num_points = num_points
 
     def __phi_displacment(self, x, a):
+        """Hermite cubic interpolation function."""
+
         phi_1 = 1 - 3 * a ** 2 + 2 * a ** 3
         phi_2 = -x * (1 - a) ** 2
         phi_3 = 3 * a ** 2 - 2 * a ** 3
@@ -208,6 +210,8 @@ class Postprocessor():
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
     def __phi_slope(self, length, a):
+        """First derivative of __phi_displacment."""
+
         phi_1 = -6 / length * a * (1 - a)
         phi_2 = -(1 + 3 * a ** 2 - 4 * a)
         phi_3 = -phi_1
@@ -216,6 +220,8 @@ class Postprocessor():
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
     def __phi_moment(self, length, a):
+        """Second derivative of __phi_displacment."""
+
         phi_1 = -6 / length**2 * (1 - 2 * a)
         phi_2 = -2 / length**2 * (3 * a - 2)
         phi_3 = -phi_1
@@ -224,6 +230,8 @@ class Postprocessor():
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
     def __phi_shear(self, length, a):
+        """Third derivative of __phi_displacment."""
+
         phi_1 = 12 / length**3
         phi_2 = -6 / length**2
         phi_3 = -phi_1
@@ -232,6 +240,7 @@ class Postprocessor():
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
     def interp(self, action):
+        """Application of the interpolation functions."""
         # all functions dont have the same arguments FIX. probablly just use and if
         # in the for loop below
         # interp_func = {'displacement': self.__phi_displacement,
@@ -253,7 +262,6 @@ class Postprocessor():
                 phi = self.__phi_moment(self.beam.len_elements[i], a)
             if action == 'shear':
                 phi = self.__phi_shear(self.beam.len_elements[i], a)
-
             points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
 
         return points
