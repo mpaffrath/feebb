@@ -221,21 +221,24 @@ class Postprocessor():
 
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
-    def __phi_moment(self, length, a):
+    def __phi_moment(self, length, x):
         """Second derivative of __phi_displacment."""
 
-        phi_1 = -6 / length**2 * (1 - 2 * a)
-        phi_2 = -2 / length**2 * (3 * a - 2)
+        # phi_1 = -6 / length**2 * (1 - 2 * a)
+        # phi_2 = -2 / length**2 * (3 * a - 2)
+        # phi_3 = -phi_1
+        # phi_4 = -2 / length * (3 * a - 1)
+        phi_1 = (-6 / (length**2)) * (1 - (2 * (x / length)))
+        phi_2 = (-2 / length) * ((3 * (x / length)) - 2)
         phi_3 = -phi_1
-        phi_4 = -2 / length * (3 * a - 1)
-
+        phi_4 = (-2 / length) * ((3 * (x / length)) - 1)
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
-    def __phi_shear(self, length, a):
+    def __phi_shear(self, length):
         """Third derivative of __phi_displacment."""
 
-        phi_1 = 12 / length**3
-        phi_2 = -6 / length**2
+        phi_1 = 12 / (length**3)
+        phi_2 = -6 / (length**2)
         phi_3 = -phi_1
         phi_4 = phi_2
 
@@ -243,7 +246,6 @@ class Postprocessor():
 
     def interp(self, action):
         """Application of the interpolation functions."""
-
 
         points = []
         for i in range(self.beam.num_elements):
@@ -261,10 +263,11 @@ class Postprocessor():
             if action == 'slope':
                 phi = self.__phi_slope(length, a)
             if action == 'moment':
-                phi = self.__phi_moment(length, a)
+                phi = self.__phi_moment(length, x_bar)
                 points.extend((E * I) * (np.sum(disp_nodes.reshape(4, 1) * phi, axis=0)))
             if action == 'shear':
-                phi = self.__phi_shear(length, a)
+                phi = self.__phi_shear(length)
+                points.extend((E * I) * (np.sum(disp_nodes.reshape(4, 1) * phi, axis=0)))
             # points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
 
         return points
