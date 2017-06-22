@@ -2,7 +2,7 @@
   "elements":[
     {
       "element":1,
-      "length":10,
+      "length":5,
       "youngs_mod":6000,
       "moment_of_inertia":1,
       "loads":[
@@ -14,7 +14,7 @@
     },
     {
       "element":2,
-      "length":10,
+      "length":5,
       "youngs_mod":6000,
       "moment_of_inertia":1,
       "loads":[
