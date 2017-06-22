@@ -30,4 +30,8 @@ print(max(post.interp('moment')))
 print(min(post.interp('moment')))
 plt.plot(post.interp('moment'))
 plt.show()
+print(max(post.interp('shear')))
+print(min(post.interp('shear')))
+plt.plot(post.interp('shear'))
+plt.show()
 
