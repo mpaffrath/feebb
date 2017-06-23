@@ -191,6 +191,9 @@ class Beam():
                 self.stiffness[i, i] = 1
                 self.load[i] = 0
 
+            if self.supports[i] > 0:
+                self.stiffness[i, i] = self.stiffness[i, i] + self.supports[i]
+
         self.displacement = np.linalg.solve(self.stiffness, self.load)
 
 
@@ -234,13 +237,14 @@ class Postprocessor():
         phi_4 = (-2 / length) * ((3 * (x / length)) - 1)
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
-    def __phi_shear(self, length):
+    def __phi_shear(self, length, x):
         """Third derivative of __phi_displacment."""
 
-        phi_1 = 12 / (length**3)
-        phi_2 = -6 / (length**2)
-        phi_3 = -phi_1
-        phi_4 = phi_2
+        fill = np.ones_like(x)
+        phi_1 = (12 / (length**3)) * fill
+        phi_2 = (-6 / (length**2)) * fill
+        phi_3 = (-12 / (length**3)) * fill
+        phi_4 = (-6 / (length**2)) * fill
 
         return np.array([phi_1, phi_2, phi_3, phi_4])
 
@@ -249,9 +253,12 @@ class Postprocessor():
 
         points = []
         for i in range(self.beam.num_elements):
+            if i != 0:
+                points.pop(-1)
+
             i_node = i * 2
             j_node = i_node + 4
-            disp_nodes = self.beam.displacement[i_node:j_node]
+            disp_nodes = self.beam.displacement[i_node:j_node].reshape(4, 1)
             length = self.beam.len_elements[i]
             E = self.beam.E_elements[i]
             I = self.beam.I_elements[i]
@@ -259,15 +266,17 @@ class Postprocessor():
             a = x_bar / length
             if action == 'displacement':
                 phi = self.__phi_displacment(x_bar, a)
-                points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
-            if action == 'slope':
+                points.extend(np.sum(disp_nodes * phi, axis=0))
+            elif action == 'slope':
                 phi = self.__phi_slope(length, a)
-            if action == 'moment':
+            elif action == 'moment':
                 phi = self.__phi_moment(length, x_bar)
-                points.extend((E * I) * (np.sum(disp_nodes.reshape(4, 1) * phi, axis=0)))
-            if action == 'shear':
-                phi = self.__phi_shear(length)
-                points.extend((E * I) * (np.sum(disp_nodes.reshape(4, 1) * phi, axis=0)))
+                # print(phi)
+                points.extend((E * I) * (np.sum(disp_nodes * phi, axis=0)))
+            elif action == 'shear':
+                phi = self.__phi_shear(length, x_bar)
+                # print(phi)
+                points.extend((E * I) * (np.sum(disp_nodes * phi, axis=0)))
             # points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
 
         return points
