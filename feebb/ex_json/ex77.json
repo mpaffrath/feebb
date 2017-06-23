@@ -1,0 +1,38 @@
+{
+  "elements":[
+    {
+      "element":1,
+      "length":1,
+      "youngs_mod":200000000000,
+      "moment_of_inertia":0.0000002,
+      "loads":[
+        {
+          "type":"udl",
+          "magnitude":4800
+        }
+      ]
+    },
+    {
+      "element":2,
+      "length":1,
+      "youngs_mod":200000000000,
+      "moment_of_inertia":0.0000002,
+      "loads":[
+        {
+          "type":"point",
+          "magnitude":3000,
+	  "location":0
+        }
+      ]
+    }
+
+  ],
+  "supports":[
+    -1,
+    -1,
+    0,
+    0,
+    200000,
+    0
+  ]
+}
