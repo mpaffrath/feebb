@@ -280,3 +280,8 @@ class Postprocessor():
             # points.extend(np.sum(disp_nodes.reshape(4, 1) * phi, axis=0))
 
         return points
+
+
+def submesh(element, mesh_size):
+
+    return
