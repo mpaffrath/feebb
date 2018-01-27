@@ -222,3 +222,7 @@ def test_sub_patch():
         else:
             assert element['loads'][0]['type'] == 'none'
     return
+
+
+def test_sub_support():
+    return
