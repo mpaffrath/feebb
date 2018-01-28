@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 pre = Preprocessor()
 pre.load_json('ex_json/test2.json')
 elems = [Element(elem) for elem in pre.elements]
+print(pre.supports)
 beam = Beam(elems, pre.supports)
 post = Postprocessor(beam, 10)
 print(max(post.interp('moment')))

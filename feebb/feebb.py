@@ -160,6 +160,123 @@ class Element:
                                     + self.fer_moment(load['magnitude'],
                                                       load['location']))
 
+class Submesh():
+    def __init__(self, element, size_mesh):
+        self.size_mesh = size_mesh
+        self.length = element['length'] / size_mesh
+        self.lengths = [self.length] * size_mesh
+        self.moi = [element['moment_of_inertia']] * size_mesh
+        self.mod = [element['youngs_mod']] * size_mesh
+        self.elements = [i for i in range(size_mesh)]
+        self.loads = []
+        self.sub_elements = []
+
+        for i, load in enumerate(element['loads']):
+            if load['type'] == 'udl':
+                self.loads.append(self.__sub_udl(load))
+            elif load['type'] == 'point' or load['type'] == 'moment':
+                self.loads.append(self.__sub_point(load, load['type']))
+            elif load['type'] == 'patch':
+                self.loads.append(self.__sub_patch(load))
+            else:
+                self.loads.append([{'type': 'none'}])
+
+        self.submesh = self.__repack()
+
+        return
+
+    def __sub_udl(self, load):
+        sub_loads = []
+        for _ in range(self.size_mesh):
+            sub_loads.append({'magnitude': load['magnitude'],
+                              'type': 'udl'
+                              })
+
+        return sub_loads
+
+    def __sub_point(self, load, load_type):
+        sub_loads = []
+        start = 0
+        end = self.length
+        for _ in range(self.size_mesh):
+            if load['location'] > end:
+                sub_loads.append({'type': 'none'})
+            elif load['location'] < start:
+                sub_loads.append({'type': 'none'})
+            else:
+                sub_loads.append({'type': load_type,
+                                  'magnitude': load['magnitude'],
+                                  'location': (load['location'] - start)
+                                  })
+
+            start = start + self.length
+            end = end + self.length
+
+        return sub_loads
+
+    def __sub_patch(self, load):
+        sub_loads = []
+        start = 0
+        end = self.length
+        load_start = load['location'][0]
+        load_end = load['location'][1]
+        for _ in range(self.size_mesh):
+            if load_start >= end or load_end <= start:
+                sub_loads.append({'type': 'none'})
+            elif load_start <= end:
+                if load_start <= start:
+                    sub_start = 0
+                    if load_end < end:
+                        sub_end = load_end - start
+                    else:
+                        sub_end = self.length
+                elif load_start > start:
+                    sub_start = load_start - start
+                    if load_end < end:
+                        sub_end = load_end - start
+                    else:
+                        sub_end = self.length
+
+                if sub_start == 0 and sub_end == self.length:
+                    sub_loads.append({'type': 'udl',
+                                      'magnitude': load['magnitude']
+                                      })
+                else:
+                    sub_loads.append({'type': 'patch',
+                                      'magnitude': load['magnitude'],
+                                      'location': [sub_start, sub_end]
+                                      })
+
+            start = start + self.length
+            end = end + self.length
+
+        return sub_loads
+
+    def __repack(self):
+        loads = list(map(list, zip(*self.loads)))
+        values = [[el, l, mod, moi, load] for el, l, mod, moi, load
+                  in zip(self.elements, self.lengths, self.mod, self.moi, loads)]
+        keys = ['element', 'length', 'youngs_mod', 'moment_of_inertia', 'loads']
+        d_lists = {x: list(y) for x, y in zip(keys, zip(*values))}
+        packed = [dict(zip(d_lists, t)) for t in zip(*d_lists.values())]
+
+        return packed
+
+
+def submesh_supports(supports, size_mesh):
+    n_elements = (len(supports) / 2) - 1
+    n_sub_elements = n_elements * size_mesh
+    n_sub_dof = n_sub_elements * 4
+    n_reduced = n_sub_dof - (n_sub_elements - 1) * 2
+    sub_supports = [0] * int(n_reduced)
+    i_step = (size_mesh - 1) * 2
+    i_list = list(range(0, int(n_elements) + 1))
+    step_list = [a for b in zip(i_list, i_list) for a in b]
+    for i, (x, y) in enumerate(zip(supports, step_list)):
+        sub_supports[y * i_step + i] = x
+
+    return sub_supports
+
 
 class Beam():
     """Class for an assembly of elements into a single beam."""
@@ -281,7 +398,3 @@ class Postprocessor():
 
         return points
 
-
-def submesh(element, mesh_size):
-
-    return

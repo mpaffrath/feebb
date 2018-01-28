@@ -1,4 +1,4 @@
-# Modify for boundary "support" conditions
+# Add tests for support submesh
 # Add "trapazodal" support when needed
 
 element_dist_load = {'element': 1,
@@ -37,6 +37,7 @@ element_moment_load = {'element': 1,
                        'loads': [{'magnitude': 5, 'type': 'moment', 'location': 3}],
                        'moment_of_inertia': 1,
                        'youngs_mod': 1}
+single_elem_support = [-1, 0, -1, 0]
 
 
 class Submesh():
@@ -140,6 +141,21 @@ class Submesh():
         packed = [dict(zip(d_lists, t)) for t in zip(*d_lists.values())]
 
         return packed
+
+
+def submesh_supports(supports, size_mesh):
+    n_elements = (len(supports) / 2) - 1
+    n_sub_elements = n_elements * size_mesh
+    n_sub_dof = n_sub_elements * 4
+    n_reduced = n_sub_dof - (n_sub_elements - 1) * 2
+    sub_supports = [0] * int(n_reduced)
+    i_step = (size_mesh - 1) * 2
+    i_list = list(range(0, int(n_elements) + 1))
+    step_list = [a for b in zip(i_list, i_list) for a in b]
+    for i, (x, y) in enumerate(zip(supports, step_list)):
+        sub_supports[y * i_step + i] = x
+
+    return sub_supports
 
 
 def test_sub_dist():
